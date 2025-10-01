@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  funnel-bot:
+    build: .
+    container_name: funnel_gears_bot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - ADMIN_ID=${ADMIN_ID}
+    volumes:
+      # Монтируем папку для базы данных (чтобы данные сохранялись)
+      - /opt/funnel-bot/data:/app/data
+      # Монтируем папку с файлами (PDF)
+      - /opt/funnel-bot/files:/app/files
+    # Если нужно логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
