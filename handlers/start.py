@@ -3,6 +3,7 @@
 import logging
 from datetime import datetime, timedelta
 from aiogram import types
+from aiogram.types import FSInputFile
 from database.database import SessionLocal
 from database.models import User, UserStep
 from funnel.messages import get_welcome_message
@@ -31,9 +32,22 @@ async def cmd_start(message: types.Message):
     finally:
         db.close()
     
-    # Отправляем первое письмо с полезной инструкцией (подарок)
-    welcome_text, welcome_keyboard = get_welcome_message()
-    await message.answer(welcome_text, reply_markup=welcome_keyboard)
+    # Отправляем приветственное сообщение
+    welcome_text, _ = get_welcome_message()
+    await message.answer(welcome_text)
+    
+    # Отправляем PDF файл сразу
+    try:
+        pdf_file = FSInputFile('/app/files/5_errors_bot_beginners.pdf')
+        await message.bot.send_document(
+            chat_id=user.id,
+            document=pdf_file,
+            caption="🎁 Ваш подарок готов!\n\n**«5 ошибок, из-за которых новички мучаются с ботами»**\n\nСохраните этот чек-лист и используйте при создании ботов!\n\n💡 Хотите научиться создавать таких ботов? Курс по aiogram 3:\nhttps://stepik.org/course/220554",
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        logging.error(f"Ошибка при отправке PDF: {e}")
+        await message.answer("Файл временно недоступен. Попробуйте позже.")
     
     # Создаем только первый шаг (через час от текущего момента)
     db = SessionLocal()
