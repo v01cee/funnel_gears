@@ -49,16 +49,25 @@ async def cmd_start(message: types.Message):
         logging.error(f"Ошибка при отправке PDF: {e}")
         await message.answer("Файл временно недоступен. Попробуйте позже.")
     
-    # Создаем только первый шаг (через час от текущего момента)
+    # Создаем только первый шаг (через час от текущего момента) если его еще нет
     db = SessionLocal()
     try:
-        hour_letter_step = UserStep(
-            user_id=user.id,
-            step_name='hour_letter',
-            scheduled_time=datetime.utcnow() + timedelta(hours=1)
-        )
-        db.add(hour_letter_step)
-        db.commit()
-        logging.info(f"Создан шаг hour_letter для пользователя {user.id}")
+        # Проверяем, есть ли уже шаг hour_letter для этого пользователя
+        existing_step = db.query(UserStep).filter(
+            UserStep.user_id == user.id,
+            UserStep.step_name == 'hour_letter'
+        ).first()
+        
+        if not existing_step:
+            hour_letter_step = UserStep(
+                user_id=user.id,
+                step_name='hour_letter',
+                scheduled_time=datetime.utcnow() + timedelta(hours=1)
+            )
+            db.add(hour_letter_step)
+            db.commit()
+            logging.info(f"Создан шаг hour_letter для пользователя {user.id}")
+        else:
+            logging.info(f"Шаг hour_letter уже существует для пользователя {user.id}")
     finally:
         db.close()
