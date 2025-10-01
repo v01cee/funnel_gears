@@ -34,7 +34,7 @@ async def cmd_start(message: types.Message):
     
     # Отправляем приветственное сообщение
     welcome_text, _ = get_welcome_message()
-    await message.answer(welcome_text)
+    await message.answer(welcome_text, parse_mode="Markdown")
     
     # Отправляем PDF файл сразу
     try:
