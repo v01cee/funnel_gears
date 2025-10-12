@@ -52,22 +52,27 @@ async def cmd_start(message: types.Message):
     # Создаем только первый шаг (через час от текущего момента) если его еще нет
     db = SessionLocal()
     try:
-        # Проверяем, есть ли уже шаг hour_letter для этого пользователя
-        existing_step = db.query(UserStep).filter(
-            UserStep.user_id == user.id,
-            UserStep.step_name == 'hour_letter'
-        ).first()
+        # Проверяем, есть ли уже какие-либо шаги воронки для этого пользователя
+        existing_steps = db.query(UserStep).filter(
+            UserStep.user_id == user.id
+        ).all()
         
-        if not existing_step:
-            hour_letter_step = UserStep(
-                user_id=user.id,
-                step_name='hour_letter',
-                scheduled_time=datetime.utcnow() + timedelta(hours=1)
-            )
-            db.add(hour_letter_step)
-            db.commit()
-            logging.info(f"Создан шаг hour_letter для пользователя {user.id}")
+        if not existing_steps:
+            # Создаем первый шаг только если у пользователя вообще нет шагов воронки
+            try:
+                hour_letter_step = UserStep(
+                    user_id=user.id,
+                    step_name='hour_letter',
+                    scheduled_time=datetime.utcnow() + timedelta(days=1)  # Через день
+                )
+                db.add(hour_letter_step)
+                db.commit()
+                logging.info(f"Создан шаг hour_letter для пользователя {user.id}")
+            except Exception as e:
+                # Если произошла ошибка уникальности (шаг уже существует)
+                db.rollback()
+                logging.warning(f"Не удалось создать шаг hour_letter для пользователя {user.id}: {e}")
         else:
-            logging.info(f"Шаг hour_letter уже существует для пользователя {user.id}")
+            logging.info(f"У пользователя {user.id} уже есть {len(existing_steps)} шагов воронки. Новые шаги не создаются.")
     finally:
         db.close()
