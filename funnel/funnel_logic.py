@@ -49,8 +49,8 @@ async def check_and_send_steps(bot: Bot):
             if 'db' in locals():
                 db.close()
         
-        # Ждем 10 секунд перед следующей проверкой (для тестирования)
-        await asyncio.sleep(10)
+        # Ждем 5 секунд перед следующей проверкой (для тестирования)
+        await asyncio.sleep(5)
 
 async def send_step_message(bot: Bot, step: UserStep, user: User, db):
     """Отправка сообщения для конкретного шага"""
@@ -61,52 +61,52 @@ async def send_step_message(bot: Bot, step: UserStep, user: User, db):
     if step.step_name == 'hour_letter':
         message_text = get_hour_letter_message(user.first_name)
         next_step_name = 'day_letter'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'day_letter':
         message_text = get_day_letter_message(user.first_name)
         next_step_name = 'quality_letter'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'quality_letter':
         message_text = get_quality_letter_message(user.first_name)
         next_step_name = 'two_days_letter'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'two_days_letter':
         message_text = get_two_days_letter_message(user.first_name)
         next_step_name = 'product2_letter'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'product2_letter':
         message_text = get_product2_letter_message(user.first_name)
         next_step_name = 'product2_letter2'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'product2_letter2':
         message_text = get_product2_letter_message(user.first_name)  # Повторное сообщение о продукте
         next_step_name = 'client_story'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'client_story':
         message_text = get_client_story_message(user.first_name)
         next_step_name = 'discount_offer'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'discount_offer':
         message_text = get_discount_offer_message(user.first_name)
         next_step_name = 'ready_kit'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'ready_kit':
         message_text = get_ready_kit_message(user.first_name)
         next_step_name = 'oto_discount'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'oto_discount':
         message_text = get_oto_discount_message(user.first_name)
         next_step_name = 'survey'
-        next_step_delay = timedelta(days=1)  # Через день
+        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'survey':
         message_text = get_survey_message(user.first_name)

@@ -36,7 +36,11 @@ async def cmd_start(message: types.Message):
     welcome_text, _ = get_welcome_message()
     await message.answer(welcome_text, parse_mode="Markdown")
     
-    # Отправляем PDF файл сразу
+    # Задержка в 5 секунд
+    import asyncio
+    await asyncio.sleep(5)
+    
+    # Отправляем PDF файл
     try:
         pdf_file = FSInputFile('/app/files/5_errors_bot_beginners.pdf')
         await message.bot.send_document(
@@ -63,7 +67,7 @@ async def cmd_start(message: types.Message):
                 hour_letter_step = UserStep(
                     user_id=user.id,
                     step_name='hour_letter',
-                    scheduled_time=datetime.utcnow() + timedelta(days=1)  # Через день
+                    scheduled_time=datetime.utcnow() + timedelta(minutes=1)  # Через 1 минуту для тестирования
                 )
                 db.add(hour_letter_step)
                 db.commit()
