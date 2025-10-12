@@ -6,6 +6,7 @@ from aiogram import types
 from aiogram.types import FSInputFile
 from database.database import SessionLocal
 from database.models import User, UserStep
+from config.funnel_timing import FUNNEL_DELAYS
 from funnel.messages import get_welcome_message
 
 async def cmd_start(message: types.Message):
@@ -67,7 +68,7 @@ async def cmd_start(message: types.Message):
                 hour_letter_step = UserStep(
                     user_id=user.id,
                     step_name='hour_letter',
-                    scheduled_time=datetime.utcnow() + timedelta(minutes=1)  # Через 1 минуту для тестирования
+                    scheduled_time=datetime.utcnow() + FUNNEL_DELAYS['hour_letter']
                 )
                 db.add(hour_letter_step)
                 db.commit()

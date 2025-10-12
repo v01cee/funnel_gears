@@ -63,22 +63,19 @@ async def show_stats(callback: types.CallbackQuery):
         sent_steps = db.query(UserStep).filter(UserStep.sent == True).count()
         pending_steps = db.query(UserStep).filter(UserStep.sent == False).count()
         
-        # Статистика по шагам
-        steps_stats = db.query(
-            UserStep.step_name,
-            db.func.count(UserStep.id).label('count'),
-            db.func.count(db.case([(UserStep.sent == True, 1)], else_=0)).label('sent_count')
-        ).group_by(UserStep.step_name).all()
-        
+        # Упрощенная статистика
         stats_text = f"📊 **Статистика бота**\n\n"
         stats_text += f"👥 Всего пользователей: {total_users}\n"
         stats_text += f"📝 Всего шагов: {total_steps}\n"
         stats_text += f"✅ Отправлено: {sent_steps}\n"
         stats_text += f"⏳ Ожидает отправки: {pending_steps}\n\n"
-        stats_text += f"📈 **По шагам:**\n"
+        stats_text += f"📈 **Последние шаги:**\n"
         
-        for step_name, count, sent_count in steps_stats:
-            stats_text += f"• {step_name}: {sent_count}/{count}\n"
+        # Показываем последние 5 шагов
+        recent_steps = db.query(UserStep).order_by(UserStep.created_at.desc()).limit(5).all()
+        for step in recent_steps:
+            status = "✅" if step.sent else "⏳"
+            stats_text += f"{status} {step.step_name} (ID: {step.user_id})\n"
         
         await callback.message.edit_text(
             stats_text,

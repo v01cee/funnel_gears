@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from aiogram import Bot
 from database.database import SessionLocal
 from database.models import User, UserStep
+from config.funnel_timing import FUNNEL_DELAYS, CHECK_INTERVAL, MESSAGE_DELAY
 from .messages import (
     get_hour_letter_message, get_day_letter_message, get_quality_letter_message,
     get_two_days_letter_message, get_product2_letter_message, get_client_story_message,
@@ -49,8 +50,8 @@ async def check_and_send_steps(bot: Bot):
             if 'db' in locals():
                 db.close()
         
-        # Ждем 5 секунд перед следующей проверкой (для тестирования)
-        await asyncio.sleep(5)
+        # Ждем перед следующей проверкой
+        await asyncio.sleep(CHECK_INTERVAL)
 
 async def send_step_message(bot: Bot, step: UserStep, user: User, db):
     """Отправка сообщения для конкретного шага"""
@@ -58,55 +59,48 @@ async def send_step_message(bot: Bot, step: UserStep, user: User, db):
     next_step_name = None
     next_step_delay = None
     
+    # Получаем задержку из настроек
+    next_step_delay = FUNNEL_DELAYS.get(step.step_name)
+    
     if step.step_name == 'hour_letter':
         message_text = get_hour_letter_message(user.first_name)
         next_step_name = 'day_letter'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'day_letter':
         message_text = get_day_letter_message(user.first_name)
         next_step_name = 'quality_letter'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'quality_letter':
         message_text = get_quality_letter_message(user.first_name)
         next_step_name = 'two_days_letter'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'two_days_letter':
         message_text = get_two_days_letter_message(user.first_name)
         next_step_name = 'product2_letter'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'product2_letter':
         message_text = get_product2_letter_message(user.first_name)
         next_step_name = 'product2_letter2'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'product2_letter2':
         message_text = get_product2_letter_message(user.first_name)  # Повторное сообщение о продукте
         next_step_name = 'client_story'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'client_story':
         message_text = get_client_story_message(user.first_name)
         next_step_name = 'discount_offer'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'discount_offer':
         message_text = get_discount_offer_message(user.first_name)
         next_step_name = 'ready_kit'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'ready_kit':
         message_text = get_ready_kit_message(user.first_name)
         next_step_name = 'oto_discount'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'oto_discount':
         message_text = get_oto_discount_message(user.first_name)
         next_step_name = 'survey'
-        next_step_delay = timedelta(minutes=1)  # Через 1 минуту для тестирования
         
     elif step.step_name == 'survey':
         message_text = get_survey_message(user.first_name)
@@ -115,8 +109,8 @@ async def send_step_message(bot: Bot, step: UserStep, user: User, db):
     # Отправляем сообщение
     if message_text:
         await bot.send_message(step.user_id, message_text)
-        # Задержка в 5 секунд между сообщениями
-        await asyncio.sleep(5)
+        # Задержка между сообщениями
+        await asyncio.sleep(MESSAGE_DELAY)
     
     # Создаем следующий шаг, если он есть
     if next_step_name and next_step_delay:
