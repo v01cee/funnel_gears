@@ -109,8 +109,9 @@ async def send_step_message(bot: Bot, step: UserStep, user: User, db):
     # Отправляем сообщение
     if message_text:
         await bot.send_message(step.user_id, message_text)
-        # Задержка между сообщениями
-        await asyncio.sleep(MESSAGE_DELAY)
+        # Задержка между сообщениями (только если больше 0)
+        if MESSAGE_DELAY > 0:
+            await asyncio.sleep(MESSAGE_DELAY)
     
     # Создаем следующий шаг, если он есть
     if next_step_name and next_step_delay:
