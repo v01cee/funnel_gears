@@ -1,14 +1,16 @@
 """Обработчик для отправки PDF файла"""
 
 import os
+from pathlib import Path
 from aiogram import types
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 async def send_pdf_handler(callback_query: types.CallbackQuery):
     """Обработчик нажатия на кнопку 'Забрать PDF'"""
     try:
-        # Путь к PDF файлу
-        pdf_path = "/app/files/5_errors_bot_beginners.pdf"
+        # Путь к PDF файлу (относительно корня проекта)
+        project_root = Path(__file__).resolve().parent.parent
+        pdf_path = str(project_root / "files" / "5_ошибок_новичка.pdf")
         
         # Проверяем, существует ли файл
         if os.path.exists(pdf_path):

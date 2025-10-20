@@ -1,6 +1,7 @@
 """Обработчик команды /start"""
 
 import logging
+from pathlib import Path
 from datetime import datetime, timedelta
 from aiogram import types
 from aiogram.types import FSInputFile
@@ -37,13 +38,15 @@ async def cmd_start(message: types.Message):
     welcome_text, _ = get_welcome_message()
     await message.answer(welcome_text, parse_mode="Markdown")
     
-    # Задержка в 5 секунд
+    # Задержка перед отправкой PDF (5 секунд)
     import asyncio
     await asyncio.sleep(5)
     
     # Отправляем PDF файл
     try:
-        pdf_file = FSInputFile('/app/files/5_errors_bot_beginners.pdf')
+        project_root = Path(__file__).resolve().parent.parent
+        pdf_path = project_root / 'files' / '5_ошибок_новичка.pdf'
+        pdf_file = FSInputFile(str(pdf_path))
         await message.bot.send_document(
             chat_id=user.id,
             document=pdf_file,
