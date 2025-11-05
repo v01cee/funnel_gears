@@ -46,15 +46,25 @@ async def cmd_start(message: types.Message):
     try:
         project_root = Path(__file__).resolve().parent.parent
         pdf_path = project_root / 'files' / '5_ошибок_новичка.pdf'
-        pdf_file = FSInputFile(str(pdf_path))
+        pdf_path_str = str(pdf_path)
+        
+        # Проверяем существование файла
+        if not pdf_path.exists():
+            logging.error(f"PDF файл не найден по пути: {pdf_path_str}")
+            await message.answer("Файл временно недоступен. Попробуйте позже.")
+            return
+        
+        logging.info(f"Отправка PDF файла: {pdf_path_str}")
+        pdf_file = FSInputFile(pdf_path_str)
         await message.bot.send_document(
             chat_id=user.id,
             document=pdf_file,
             caption="🎁 Ваш подарок готов!\n\n*«5 ошибок, из-за которых новички мучаются с ботами»*\n\nСохраните этот чек-лист и используйте при создании ботов!\n\n💡 Хотите научиться создавать таких ботов? Курс по aiogram 3:\nhttps://stepik.org/course/255830/promo",
             parse_mode="Markdown"
         )
+        logging.info(f"PDF файл успешно отправлен пользователю {user.id}")
     except Exception as e:
-        logging.error(f"Ошибка при отправке PDF: {e}")
+        logging.error(f"Ошибка при отправке PDF: {e}", exc_info=True)
         await message.answer("Файл временно недоступен. Попробуйте позже.")
     
     # Создаем только первый шаг (через час от текущего момента) если его еще нет
