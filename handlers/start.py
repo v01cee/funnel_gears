@@ -1,10 +1,9 @@
 """Обработчик команды /start"""
 
 import logging
-from pathlib import Path
 from datetime import datetime, timedelta
 from aiogram import types
-from aiogram.types import FSInputFile
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from database.database import SessionLocal
 from database.models import User, UserStep
 from config.funnel_timing import FUNNEL_DELAYS
@@ -36,36 +35,13 @@ async def cmd_start(message: types.Message):
     
     # Отправляем приветственное сообщение
     welcome_text, _ = get_welcome_message()
-    await message.answer(welcome_text, parse_mode="Markdown")
     
-    # Задержка перед отправкой PDF (5 секунд)
-    import asyncio
-    await asyncio.sleep(5)
+    # Создаем инлайн-кнопку для получения чек-листа
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="5 ошибок новичка", callback_data="get_5_mistakes")]
+    ])
     
-    # Отправляем PDF файл
-    try:
-        project_root = Path(__file__).resolve().parent.parent
-        pdf_path = project_root / 'files' / '5_ошибок_новичка.pdf'
-        pdf_path_str = str(pdf_path)
-        
-        # Проверяем существование файла
-        if not pdf_path.exists():
-            logging.error(f"PDF файл не найден по пути: {pdf_path_str}")
-            await message.answer("Файл временно недоступен. Попробуйте позже.")
-            return
-        
-        logging.info(f"Отправка PDF файла: {pdf_path_str}")
-        pdf_file = FSInputFile(pdf_path_str)
-        await message.bot.send_document(
-            chat_id=user.id,
-            document=pdf_file,
-            caption="🎁 Ваш подарок готов!\n\n*«5 ошибок, из-за которых новички мучаются с ботами»*\n\nСохраните этот чек-лист и используйте при создании ботов!\n\n💡 Хотите научиться создавать таких ботов? Курс по aiogram 3:\nhttps://stepik.org/course/255830/promo",
-            parse_mode="Markdown"
-        )
-        logging.info(f"PDF файл успешно отправлен пользователю {user.id}")
-    except Exception as e:
-        logging.error(f"Ошибка при отправке PDF: {e}", exc_info=True)
-        await message.answer("Файл временно недоступен. Попробуйте позже.")
+    await message.answer(welcome_text, parse_mode="Markdown", reply_markup=keyboard)
     
     # Создаем только первый шаг (через час от текущего момента) если его еще нет
     db = SessionLocal()
